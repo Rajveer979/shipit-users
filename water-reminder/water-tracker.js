@@ -47,15 +47,21 @@ function addCustomWater() {
 }
 
 function updateProgress() {
-    // Level 3 Bug 1: Division by zero possible when goal is 0
-    const percentage = (currentIntake / dailyGoal) * 100;
-    
+    let percentage = 0;
+
+    if (dailyGoal > 0) {
+        percentage = (currentIntake / dailyGoal) * 100;
+    }
+
+    // Clamp to 0–100 range
+    if (percentage < 0) percentage = 0;
+    if (percentage > 100) percentage = 100;
+
     document.getElementById('progress-text').textContent = `${currentIntake} / ${dailyGoal} ml`;
     document.getElementById('progress-bar').style.width = `${percentage}%`;
-    
-    // Level 3 Bug 2: Percentage can exceed 100% and display incorrectly
     document.getElementById('percentage-display').textContent = `${Math.round(percentage)}%`;
 }
+
 
 function updateWaterLog() {
     const logContainer = document.getElementById('water-log');
