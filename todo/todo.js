@@ -150,8 +150,8 @@ function sortTasks(sortBy) {
     currentSort = sortBy;
     
     if (sortBy === 'priority') {
-        // Level 5 Bug 1: Priority sorting logic is incorrect
-        const priorityOrder = { 'low': 1, 'medium': 2, 'high': 3 }; // Bug: Wrong order, high should be first
+        // ✅ Fix: High priority comes first, then Medium, then Low
+        const priorityOrder = { 'high': 1, 'medium': 2, 'low': 3 };
         tasks.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
     } else if (sortBy === 'date') {
         tasks.sort((a, b) => {
@@ -163,7 +163,6 @@ function sortTasks(sortBy) {
     
     renderTasks();
 }
-
 function updateCounts() {
     const totalTasks = tasks.length;
     const completedTasks = tasks.filter(t => t.completed).length;
