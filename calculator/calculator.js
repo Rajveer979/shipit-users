@@ -103,10 +103,20 @@ function deleteLast() {
 
 // Bug Level 3 - Issue 1: Memory functions don't work with current display value
 function memoryStore() {
-    if (currentInput !== '') {
-        memory = parseFloat(display.value); // Bug: Should use currentInput or display.value consistently
+    let val = parseFloat(currentInput || display.value);
+    if (isNaN(val)) return;
+
+    if (val > Number.MAX_SAFE_INTEGER) {
+        memory = Number.MAX_SAFE_INTEGER;
+        alert("⚠️ Memory overflow! Value capped.");
+    } else if (val < Number.MIN_SAFE_INTEGER) {
+        memory = Number.MIN_SAFE_INTEGER;
+        alert("⚠️ Memory underflow! Value capped.");
+    } else {
+        memory = val;
     }
 }
+
 
 function memoryRecall() {
     currentInput = memory.toString();
@@ -119,12 +129,28 @@ function memoryClear() {
 
 // Bug Level 3 - Issue 2: Memory add function has logical error
 function memoryAdd() {
+    let valueToAdd = 0;
+
     if (currentInput !== '') {
-        memory += parseFloat(currentInput);
+        valueToAdd = parseFloat(currentInput);
     } else {
-        memory += parseFloat(display.value); // Bug: Inconsistent behavior
+        valueToAdd = parseFloat(display.value);
+    }
+
+    if (isNaN(valueToAdd)) return;
+
+    memory += valueToAdd;
+
+    // Clamp memory within safe range
+    if (memory > Number.MAX_SAFE_INTEGER) {
+        memory = Number.MAX_SAFE_INTEGER;
+        alert("⚠️ Memory overflow! Value capped at MAX_SAFE_INTEGER.");
+    } else if (memory < Number.MIN_SAFE_INTEGER) {
+        memory = Number.MIN_SAFE_INTEGER;
+        alert("⚠️ Memory underflow! Value capped at MIN_SAFE_INTEGER.");
     }
 }
+
 
 // Bug Level 4 - Issue 1: Multiple decimal points allowed
 function appendToDisplay(value) {
