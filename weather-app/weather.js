@@ -4,15 +4,17 @@
 let apiKey = "dummyapikey"; 
 let weatherDisplay = document.getElementById("weather-display");
 let errorDisplay = document.getElementById("error-display");
+let searchBtn = document.getElementById("search-btn");
+let isFetching = false; // 🚀 prevent request spam
 
-// Add Enter key listener (fix Level 1 Bug 1)
+// Add Enter key listener
 document.getElementById("city-input").addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     debouncedGetWeather();
   }
 });
 
-// Debounce wrapper (fix Level 5 Bug 1)
+// Debounce wrapper
 function debounce(fn, delay) {
   let timeout;
   return (...args) => {
@@ -20,15 +22,17 @@ function debounce(fn, delay) {
     timeout = setTimeout(() => fn(...args), delay);
   };
 }
-const debouncedGetWeather = debounce(getWeather, 600);
+const debouncedGetWeather = debounce(getWeather, 500);
 
-// Input validation helper (fix Level 5 Bug 2)
+// Input validation
 function isValidCityName(city) {
-  const regex = /^[a-zA-Z\s]{2,50}$/; // only letters and spaces
+  const regex = /^[a-zA-Z\s]{2,50}$/; 
   return regex.test(city);
 }
 
 function getWeather() {
+  if (isFetching) return; // 🚀 block spamming
+
   const city = document.getElementById("city-input").value.trim();
 
   if (!city) {
@@ -42,6 +46,11 @@ function getWeather() {
     weatherDisplay.innerHTML = "";
     return;
   }
+
+  // Disable button & set flag
+  isFetching = true;
+  searchBtn.disabled = true;
+  searchBtn.classList.add("opacity-50", "cursor-not-allowed");
 
   errorDisplay.textContent = "";
   weatherDisplay.innerHTML = "Loading...";
@@ -58,7 +67,6 @@ function getWeather() {
         throw new Error("Invalid data received");
       }
 
-      // Correct fields for WeatherAPI
       const temp = data.current.temp_c;
       const desc = data.current.condition.text;
       const icon = data.current.condition.icon.startsWith("http")
@@ -76,8 +84,13 @@ function getWeather() {
       errorDisplay.textContent = "";
     })
     .catch((err) => {
-      // Clear old weather if new search fails (fix Level 4 Bug 1)
       weatherDisplay.innerHTML = "";
       errorDisplay.textContent = `Error: ${err.message}`;
+    })
+    .finally(() => {
+      // ✅ Re-enable after request finishes
+      isFetching = false;
+      searchBtn.disabled = false;
+      searchBtn.classList.remove("opacity-50", "cursor-not-allowed");
     });
 }
